@@ -1,0 +1,135 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id              String        @id @default(cuid())
+  name            String        @db.VarChar(80)
+  email           String        @unique
+  password        String
+  role            Role          @default(USER)
+  addresses       Address[]
+  transactions    Transaction[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@map("users")
+}
+
+model Address {
+  id              Int            @id @default(autoincrement())
+  user_id         String
+  street          String
+  phone           String
+  is_primary      Boolean        @default(false)
+  label           String
+  transactions    Transaction[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  user            User           @relation(fields: [user_id], references: [id])
+
+  @@map("addresses")
+}
+
+model Transaction {
+  id              Int           @id @default(autoincrement())
+  user_id         String
+  address_id      Int
+  total_amount    Int
+  items           TransactionItem[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  user            User          @relation(fields: [user_id], references: [id])
+  address         Address       @relation(fields: [address_id], references: [id])
+
+  @@map("transactions")
+}
+
+model TransactionItem {
+  id              Int           @id @default(autoincrement())
+  transaction_id  Int
+  quantity        Int
+  amount          Int
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  transaction     Transaction   @relation(fields: [transaction_id], references: [id])
+
+  @@map("transaction_items")
+}
+
+model Shoe {
+  id              Int           @id @default(autoincrement())
+  quantity        Int
+  price           Int
+  size            Int
+  variant         String
+  shoe_detail_id  Int
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  shoe_detail     ShoeDetail    @relation(fields: [shoe_detail_id], references: [id])
+
+  @@map("shoes")
+}
+
+
+model ShoeDetail {
+  id              Int           @id @default(autoincrement())
+  color           String
+  image           String
+  description     String        @db.VarChar(255)
+  image_url       String
+  shoe            Shoe[]
+  brand_id        Int
+  category_id     Int
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  brand           brand         @relation(fields: [brand_id], references: [id])
+  category        category      @relation(fields: [category_id], references: [id])
+
+  @@map("shoe_details")
+}
+
+model brand {
+  id              Int           @id @default(autoincrement())
+  name            String
+  image_url       String
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  shoeDetails     ShoeDetail[]
+
+  @@map("brands")
+}
+
+model category {
+  id              Int           @id @default(autoincrement())
+  name            String
+  image_url       String
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  shoeDetails     ShoeDetail[]
+
+  @@map("categories")
+}
