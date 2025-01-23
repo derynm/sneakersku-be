@@ -53,7 +53,7 @@ model Transaction {
   user_id         String
   address_id      Int
   total_amount    Int
-  items           TransactionItem[]
+  items           Json         
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
@@ -63,52 +63,54 @@ model Transaction {
   @@map("transactions")
 }
 
-model TransactionItem {
-  id              Int           @id @default(autoincrement())
-  transaction_id  Int
-  quantity        Int
-  amount          Int
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+// model TransactionItem {
+//   id              Int           @id @default(autoincrement())
+//   transaction_id  Int
+//   quantity        Int
+//   amount          Int
+//   createdAt       DateTime      @default(now())
+//   updatedAt       DateTime      @updatedAt
 
-  transaction     Transaction   @relation(fields: [transaction_id], references: [id])
+//   transaction     Transaction   @relation(fields: [transaction_id], references: [id])
 
-  @@map("transaction_items")
-}
+//   @@map("transaction_items")
+// }
 
 model Shoe {
   id              Int           @id @default(autoincrement())
-  quantity        Int
-  price           Int
-  size            Int
-  variant         String
-  shoe_detail_id  Int
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-
-  shoe_detail     ShoeDetail    @relation(fields: [shoe_detail_id], references: [id])
-
-  @@map("shoes")
-}
-
-
-model ShoeDetail {
-  id              Int           @id @default(autoincrement())
-  color           String
-  image           String
+  name            String
   description     String        @db.VarChar(255)
-  image_url       String
-  shoe            Shoe[]
+  base_price      Int
   brand_id        Int
   category_id     Int
+  variants        Json          
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
   brand           brand         @relation(fields: [brand_id], references: [id])
   category        category      @relation(fields: [category_id], references: [id])
 
-  @@map("shoe_details")
+  @@map("shoes")
 }
+
+
+// model ShoeDetail {
+//   id              Int           @id @default(autoincrement())
+//   color           String
+//   image           String
+//   description     String        @db.VarChar(255)
+//   image_url       String
+//   shoe            Shoe[]
+//   brand_id        Int
+//   category_id     Int
+//   createdAt       DateTime      @default(now())
+//   updatedAt       DateTime      @updatedAt
+
+//   brand           brand         @relation(fields: [brand_id], references: [id])
+//   category        category      @relation(fields: [category_id], references: [id])
+
+//   @@map("shoe_details")
+// }
 
 model brand {
   id              Int           @id @default(autoincrement())
@@ -117,7 +119,7 @@ model brand {
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
-  shoeDetails     ShoeDetail[]
+  shoeDetails     Shoe[]
 
   @@map("brands")
 }
@@ -129,7 +131,7 @@ model category {
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
-  shoeDetails     ShoeDetail[]
+  shoeDetails     Shoe[]
 
   @@map("categories")
 }
