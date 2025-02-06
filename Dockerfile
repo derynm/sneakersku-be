@@ -9,7 +9,11 @@ COPY . .
 # Install app dependencies
 RUN bun install
 
-RUN bun run generate
+# Generate Prisma client
+RUN bun prisma generate
+
+# Apply database migrations
+RUN bunx prisma migrate deploy
 
 # Bind the app to port 3000
 EXPOSE 3000
