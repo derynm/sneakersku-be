@@ -12,9 +12,6 @@ RUN bun install
 # Generate Prisma client
 RUN bun prisma generate
 
-# Apply database migrations
-RUN bunx prisma migrate deploy
-
 # Bind the app to port 3000
 EXPOSE 3000
 
