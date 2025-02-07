@@ -8,6 +8,9 @@ RUN bun install
 
 COPY . /app
 
+RUN test -n "$DATABASE_URL" || (echo "Error: DATABASE_URL tidak ditemukan!" && exit 1)
+
+
 RUN bunx prisma generate
 
 RUN bun prisma migrate deploy
