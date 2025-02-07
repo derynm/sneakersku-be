@@ -1,5 +1,6 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { swaggerUI } from "@hono/swagger-ui";
+import { cors } from "hono/cors";
 
 import { authRoute } from "./routes/auth";
 import { addressRoute } from "./routes/address";
@@ -13,6 +14,8 @@ const app = new OpenAPIHono()
 app.get('/', (c) => {
   return c.text('sneakersku-be')
 })
+
+app.use('/*',cors());
 
 app.route("/auth", authRoute);
 app.route("/addresses", addressRoute);
