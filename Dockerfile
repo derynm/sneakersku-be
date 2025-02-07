@@ -8,6 +8,12 @@ RUN bun install
 
 COPY . /app
 
+# Tambahkan ARG dan ENV agar variabel bisa diakses saat build
+ARG DATABASE_URL
+ENV DATABASE_URL=$DATABASE_URL
+
+RUN test -n "$DATABASE_URL" || (echo "Error: DATABASE_URL tidak ditemukan!" && exit 1)
+
 RUN bunx prisma generate
 
 RUN bun prisma migrate deploy
