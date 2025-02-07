@@ -1,15 +1,13 @@
 FROM oven/bun:debian
 
-# Create and change to the app directory
-WORKDIR /usr/src/app
+WORKDIR /app
 
-# Copy app files
-COPY . .
+COPY package.json /app
 
-# Install app dependencies
 RUN bun install
 
-# Generate Prisma client
+COPY . /app
+
 RUN bunx prisma generate
 
 RUN bun prisma migrate deploy
