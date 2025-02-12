@@ -5,6 +5,7 @@ import { ZodError } from "zod";
 
 
 import { checkAuth } from '../middleware/auth';
+import { allowedRoles } from "../middleware/role";
 
 export const prisma = new PrismaClient();
 
@@ -93,7 +94,7 @@ export const categoriesRoute = new OpenAPIHono({
             path: '/',
             summary: 'Create a new category',
             security: [{ AUTH_TOKEN: [] }],
-            middleware: [checkAuth],
+            middleware: [checkAuth, allowedRoles(['ADMIN'])],
             request: {
                 body: {
                     content: {
@@ -131,7 +132,7 @@ export const categoriesRoute = new OpenAPIHono({
             path: '/{id}',
             summary: 'Update a category by id',
             security: [{ AUTH_TOKEN: [] }],
-            middleware: [checkAuth],
+            middleware: [checkAuth, allowedRoles(['ADMIN'])],
             request: {
                 body: {
                     content: {
@@ -187,7 +188,7 @@ export const categoriesRoute = new OpenAPIHono({
             path: '/{id}',
             summary: 'Delete a category',
             security: [{ AUTH_TOKEN: [] }],
-            middleware: [checkAuth],
+            middleware: [checkAuth, allowedRoles(['ADMIN'])],
             responses: {
                 200: {
                     description: "Successfully delete category.",

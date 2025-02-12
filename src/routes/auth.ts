@@ -110,7 +110,7 @@ export const authRoute = new OpenAPIHono({
                     });
                 }
 
-                const token = await createJwt(user.id);
+                const token = await createJwt(user.id, user.role);
 
                 return c.json({
                     message: "Successfully logged in",

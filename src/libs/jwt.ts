@@ -19,14 +19,15 @@ export const getEncodedSecret = async () => {
     return array.join(',');
 };  
 
-export const createJwt = async ( userId : string ) => {
+export const createJwt = async ( userId : string, userRole : string ) => {
     const secret = await getEncodedSecret();
 
     const payload =  {
         sub: {
             user_id: userId,
+            user_role: userRole
         },
-        exp: Math.floor(Date.now() / 1000) + 60 * 5,
+        exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24,
     }
 
     const token = await sign(payload, secret);

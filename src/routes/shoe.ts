@@ -4,6 +4,7 @@ import { PrismaClient } from "@prisma/client";
 import { ZodError } from "zod";
 
 import { checkAuth } from '../middleware/auth';
+import { allowedRoles } from "../middleware/role";
 
 export const prisma = new PrismaClient();
 
@@ -30,7 +31,7 @@ export const shoesRoute = new OpenAPIHono({
             path: '/',
             summary: 'Create a new shoe',
             security: [{ AUTH_TOKEN: [] }],
-            middleware: [checkAuth],
+            middleware: [checkAuth, allowedRoles(['ADMIN'])],
             request: {
                 body: {
                     content: {
@@ -129,7 +130,7 @@ export const shoesRoute = new OpenAPIHono({
             path: '/{id}',
             summary: 'Update a shoe by id',
             security: [{ AUTH_TOKEN: [] }],
-            middleware: [checkAuth],
+            middleware: [checkAuth, allowedRoles(['ADMIN'])],
             request: {
                 body: {
                     content: {

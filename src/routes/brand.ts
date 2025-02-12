@@ -4,6 +4,7 @@ import { PrismaClient } from "@prisma/client";
 import { ZodError } from "zod";
 
 import { checkAuth } from '../middleware/auth';
+import { allowedRoles } from "../middleware/role";
 
 export const prisma = new PrismaClient();
 
@@ -91,7 +92,7 @@ export const brandRoute = new OpenAPIHono({
             path: '/',
             summary: 'Create a new brand',
             security: [{ AUTH_TOKEN: [] }],
-            middleware: [checkAuth],
+            middleware: [checkAuth, allowedRoles(['ADMIN'])],
             request: {
                 body: {
                     content: {
@@ -129,7 +130,7 @@ export const brandRoute = new OpenAPIHono({
             path: '/{id}',
             summary: 'Update a brand by id',
             security: [{ AUTH_TOKEN: [] }],
-            middleware: [checkAuth],
+            middleware: [checkAuth, allowedRoles(['ADMIN'])],
             request: {
                 body: {
                     content: {
@@ -186,7 +187,7 @@ export const brandRoute = new OpenAPIHono({
             path: '/{id}',
             summary: 'Delete a brand',
             security: [{ AUTH_TOKEN: [] }],
-            middleware: [checkAuth],
+            middleware: [checkAuth, allowedRoles(['ADMIN'])],
             responses: {
                 200: {
                     description: "Successfully delete brand.",
