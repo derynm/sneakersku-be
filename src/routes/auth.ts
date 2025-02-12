@@ -42,6 +42,10 @@ export const authRoute = new OpenAPIHono()
                             algorithm: "argon2id",
                         }),
                     },
+                    select: {
+                        name: true,
+                        role: true,
+                    }
                 });
                 return c.json(user);
             } catch (error) {
