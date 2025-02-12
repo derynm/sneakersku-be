@@ -1,6 +1,7 @@
 import { OpenAPIHono, z } from "@hono/zod-openapi";
 import { AddressSchema } from "../schemas/address-schema";
 import { PrismaClient } from "@prisma/client";
+import { ZodError } from "zod";
 
 import { checkAuth } from '../middleware/auth';
 
@@ -8,7 +9,21 @@ export const prisma = new PrismaClient();
 
 const API_TAG = ["Address"];
 
-export const addressRoute = new OpenAPIHono()
+export const addressRoute = new OpenAPIHono({
+    defaultHook: (result, c) => {
+        if (result.success) {
+            return;
+        }
+        if (result.error instanceof ZodError) {
+            return c.json({
+                message: "Validation error",
+                details: result.error.errors.map((e) => ({
+                    field: e.path.join("."),
+                    message: e.message,
+                })),
+            }, 400);
+        }
+    }})
     .openapi(
         {
             method: 'get',
@@ -89,6 +104,17 @@ export const addressRoute = new OpenAPIHono()
                     }
                 }
             },
+            parameters: [
+                {
+                    in: 'path',
+                    name: 'id',
+                    schema: {
+                        type: 'integer'
+                    },
+                    required: true,
+                    description: 'Address ID'
+                }
+            ],
             responses: {
                 200: {
                     description: "Successfully update Address.",
@@ -123,6 +149,17 @@ export const addressRoute = new OpenAPIHono()
             path: '/{id}/primary',
             security: [{ AUTH_TOKEN: [] }],
             middleware: [checkAuth],
+            parameters: [
+                {
+                    in: 'path',
+                    name: 'id',
+                    schema: {
+                        type: 'integer'
+                    },
+                    required: true,
+                    description: 'Address ID'
+                }
+            ],
             responses: {
                 200: {
                     description: "Successfully set primary Address.",
@@ -161,6 +198,17 @@ export const addressRoute = new OpenAPIHono()
             path: '/{id}',
             security: [{ AUTH_TOKEN: [] }],
             middleware: [checkAuth],
+            parameters: [
+                {
+                    in: 'path',
+                    name: 'id',
+                    schema: {
+                        type: 'integer'
+                    },
+                    required: true,
+                    description: 'Address ID'
+                }
+            ],
             responses: {
                 200: {
                     description: "Successfully delete Address.",

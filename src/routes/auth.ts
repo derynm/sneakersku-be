@@ -2,14 +2,29 @@ import { OpenAPIHono, z } from "@hono/zod-openapi";
 import { RegisterSchema, LoginSchema } from "../schemas/auth-schema";
 import { PrismaClient } from "@prisma/client";
 
-import { createJwt, verifyJwt } from "../libs/jwt";
+import { createJwt } from "../libs/jwt";
 import { checkAuth } from '../middleware/auth';
+import { ZodError } from "zod";
 
 export const prisma = new PrismaClient();
 
 const API_TAG = ["Auth"];
 
-export const authRoute = new OpenAPIHono()
+export const authRoute = new OpenAPIHono({
+    defaultHook: (result, c) => {
+        if (result.success) {
+            return;
+        }
+        if (result.error instanceof ZodError) {
+            return c.json({
+                message: "Validation error",
+                details: result.error.errors.map((e) => ({
+                    field: e.path.join("."),
+                    message: e.message,
+                })),
+            }, 400);
+        }
+    }})
     .openapi(
         {
             method: 'post',
@@ -104,8 +119,10 @@ export const authRoute = new OpenAPIHono()
                         token
                     }
                 });
-            } catch (error) {
-                throw error;
+            } catch (error:any) {
+                return c.json({
+                    message: error.name,
+                })
             }
         }
 
@@ -130,11 +147,7 @@ export const authRoute = new OpenAPIHono()
         async (c) => {
             // console.log(c.req.header());
             try {
-                const token = c.req.header('Authorization')
 
-                if (!token) {
-                    throw new Error('Authorization header is missing')
-                }
                 const tokenPayload = c.get('user');
 
                 console.log(tokenPayload);

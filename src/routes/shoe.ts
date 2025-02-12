@@ -1,6 +1,7 @@
 import { OpenAPIHono, z } from "@hono/zod-openapi";
 import { ShoeCreateSchema } from "../schemas/shoe-schema";
 import { PrismaClient } from "@prisma/client";
+import { ZodError } from "zod";
 
 import { checkAuth } from '../middleware/auth';
 
@@ -8,7 +9,21 @@ export const prisma = new PrismaClient();
 
 const API_TAG = ["Shoes"];
 
-export const shoesRoute = new OpenAPIHono()
+export const shoesRoute = new OpenAPIHono({
+    defaultHook: (result, c) => {
+        if (result.success) {
+            return;
+        }
+        if (result.error instanceof ZodError) {
+            return c.json({
+                message: "Validation error",
+                details: result.error.errors.map((e) => ({
+                    field: e.path.join("."),
+                    message: e.message,
+                })),
+            }, 400);
+        }
+    }})
     .openapi(
         {
             method: 'post',
@@ -82,6 +97,17 @@ export const shoesRoute = new OpenAPIHono()
                     description: "Successfully get a shoe by id.",
                 },
             },
+            parameters: [
+                {
+                    in: 'path',
+                    name: 'id',
+                    schema: {
+                        type: 'integer'
+                    },
+                    required: true,
+                    description: 'Shoe ID'
+                }
+            ],
             tags: API_TAG,
         },
         async (c) => {
@@ -118,6 +144,17 @@ export const shoesRoute = new OpenAPIHono()
                     description: "Successfully update a shoe by id.",
                 },
             },
+            parameters: [
+                {
+                    in: 'path',
+                    name: 'id',
+                    schema: {
+                        type: 'integer'
+                    },
+                    required: true,
+                    description: 'Shoe ID'
+                }
+            ],
             tags: API_TAG,
         },
         async (c) => {

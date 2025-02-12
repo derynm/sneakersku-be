@@ -1,6 +1,7 @@
 import { OpenAPIHono, z } from "@hono/zod-openapi";
 import { TransactionSchema } from "../schemas/transaction-schema";
 import { PrismaClient } from "@prisma/client";
+import { ZodError } from "zod";
 
 import { checkAuth } from '../middleware/auth';
 
@@ -8,7 +9,21 @@ export const prisma = new PrismaClient();
 
 const API_TAG = ["Transaction"];
 
-export const transactionRoute = new OpenAPIHono()
+export const transactionRoute = new OpenAPIHono({
+    defaultHook: (result, c) => {
+        if (result.success) {
+            return;
+        }
+        if (result.error instanceof ZodError) {
+            return c.json({
+                message: "Validation error",
+                details: result.error.errors.map((e) => ({
+                    field: e.path.join("."),
+                    message: e.message,
+                })),
+            }, 400);
+        }
+    }})
     .openapi(
         {
             method: 'get',

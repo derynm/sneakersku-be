@@ -1,4 +1,6 @@
 import { sign, verify } from 'hono/jwt'
+import { AppError } from '../errors/app-error';
+import ERROR from '../const/error';
 
 interface JWTVerifyPayload {
     sub: {
@@ -38,8 +40,7 @@ export const verifyJwt = async ( token : string ):Promise<JWTVerifyPayload | nul
         return decodedPayload as unknown as JWTVerifyPayload;
 
     } catch (error) {
-        console.log((error as any));
-        return null;
+        throw new AppError(ERROR.INVALID_TOKEN_AUTH)
     }
 
 }

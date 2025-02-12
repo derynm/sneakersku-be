@@ -1,6 +1,7 @@
 import { OpenAPIHono, z } from "@hono/zod-openapi";
 import { BrandSchema } from "../schemas/brand-schema";
 import { PrismaClient } from "@prisma/client";
+import { ZodError } from "zod";
 
 import { checkAuth } from '../middleware/auth';
 
@@ -8,7 +9,21 @@ export const prisma = new PrismaClient();
 
 const API_TAG = ["Brand"];
 
-export const brandRoute = new OpenAPIHono()
+export const brandRoute = new OpenAPIHono({
+    defaultHook: (result, c) => {
+        if (result.success) {
+            return;
+        }
+        if (result.error instanceof ZodError) {
+            return c.json({
+                message: "Validation error",
+                details: result.error.errors.map((e) => ({
+                    field: e.path.join("."),
+                    message: e.message,
+                })),
+            }, 400);
+        }
+    }})
     .openapi(
         {
             method: 'get',
@@ -40,6 +55,17 @@ export const brandRoute = new OpenAPIHono()
                     description: "Successfully get brand by id.",
                 },
             },
+            parameters: [
+                {
+                    in: 'path',
+                    name: 'id',
+                    schema: {
+                        type: 'integer'
+                    },
+                    required: true,
+                    description: 'Brand ID'
+                }
+            ],
             tags: API_TAG,
         },
         async (c) => {
@@ -118,6 +144,17 @@ export const brandRoute = new OpenAPIHono()
                     description: "Successfully update brand by id.",
                 },
             },
+            parameters: [
+                {
+                    in: 'path',
+                    name: 'id',
+                    schema: {
+                        type: 'integer'
+                    },
+                    required: true,
+                    description: 'Brand ID'
+                }
+            ],
             tags: API_TAG,
             
         },
@@ -155,6 +192,17 @@ export const brandRoute = new OpenAPIHono()
                     description: "Successfully delete brand.",
                 },
             },
+            parameters: [
+                {
+                    in: 'path',
+                    name: 'id',
+                    schema: {
+                        type: 'integer'
+                    },
+                    required: true,
+                    description: 'Brand ID'
+                }
+            ],
             tags: API_TAG,
         },
         async (c) => {
