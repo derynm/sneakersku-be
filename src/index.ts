@@ -11,6 +11,7 @@ import { categoriesRoute } from "./routes/category";
 import { shoesRoute } from "./routes/shoe";
 import { transactionRoute } from "./routes/transaction";
 import { cartRoute } from "./routes/cart";
+import { userRoute } from "./routes/user";
 
 const app = new OpenAPIHono()
 
@@ -28,6 +29,7 @@ app.get('/', (c) => {
 app.use('/*',cors());
 
 app.route("/auth", authRoute);
+app.route("/users", userRoute)
 app.route("/addresses", addressRoute);
 app.route("/brands", brandRoute);
 app.route("/categories", categoriesRoute);

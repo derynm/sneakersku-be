@@ -12,7 +12,6 @@ const redis = new Redis({
 
 const API_TAG = ["Cart"];
 
-// Schema definitions
 const CartItemSchema = z.object({
     shoeId: z.number(),
     variantKey: z.string(),
@@ -23,7 +22,6 @@ const CheckoutSchema = z.object({
     address_id: z.number(),
 });
 
-// Helper function to get cart key
 const getCartKey = (userId: string) => `cart:${userId}`;
 
 export const cartRoute = new OpenAPIHono({
@@ -99,7 +97,6 @@ export const cartRoute = new OpenAPIHono({
                 const userId = (c.get('user') as any).id;
                 const body = await c.req.json();
                 
-                // Validate shoe and variant
                 const shoe = await prisma.shoe.findUnique({
                     where: { id: body.shoeId },
                     include: { brand: true, category: true }
@@ -145,7 +142,7 @@ export const cartRoute = new OpenAPIHono({
                     sum + (item.price * item.quantity), 0);
                 cart.updatedAt = Date.now();
 
-                await redis.set(cartKey, cart, { ex: 24 * 60 * 60 });
+                await redis.set(cartKey, cart);
                 return c.json(cart);
             } catch (error) {
                 throw error;
@@ -229,7 +226,7 @@ export const cartRoute = new OpenAPIHono({
                     sum + (item.price * item.quantity), 0);
                 cart.updatedAt = Date.now();
 
-                await redis.set(cartKey, cart, { ex: 24 * 60 * 60 });
+                await redis.set(cartKey, cart);
                 return c.json(cart);
             } catch (error) {
                 throw error;
@@ -284,7 +281,6 @@ export const cartRoute = new OpenAPIHono({
                     return c.json({ error: 'Invalid address' }, 400);
                 }
 
-                // Create transaction
                 const transaction = await prisma.transaction.create({
                     data: {
                         user_id: userId,
@@ -294,7 +290,6 @@ export const cartRoute = new OpenAPIHono({
                     }
                 });
 
-                // Clear cart after successful checkout
                 await redis.del(cartKey);
 
                 return c.json({
