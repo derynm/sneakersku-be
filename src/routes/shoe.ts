@@ -81,8 +81,36 @@ export const shoesRoute = new OpenAPIHono({
         },
         async (c) => {
             try {
-                const shoes = await prisma.shoe.findMany();
-                return c.json(shoes);
+                const shoes = await prisma.shoe.findMany(
+                    {
+                        include: {
+                            brand: {
+                                select: {
+                                    name: true,
+                                    image_url: true
+                                }
+                            },
+                            category: {
+                                select: {
+                                    name: true,
+                                    image_url: true
+                                }
+                            }
+                        }
+                    }
+                );
+
+                const shoesData = shoes.map(shoe => {
+                    const variants = shoe.variants as Record<string, { image_url?: string }>;
+                    const firstVariantWithImage = Object.values(variants).find(variant => variant.image_url);
+                    
+                    return {
+                        ...shoe,
+                        first_image: firstVariantWithImage?.image_url || null
+                    };
+                });
+
+                return c.json(shoesData);
             } catch (error) {
                 throw error;
             }
@@ -116,9 +144,30 @@ export const shoesRoute = new OpenAPIHono({
                 const shoe = await prisma.shoe.findUnique({
                     where: {
                         id: Number(c.req.param('id'))
+                    },
+                    include: {
+                        brand: {
+                            select: {
+                                name: true,
+                                image_url: true
+                            }
+                        },
+                        category: {
+                            select: {
+                                name: true,
+                                image_url: true
+                            }
+                        }
                     }
                 });
-                return c.json(shoe);
+
+                const variants = shoe?.variants as Record<string, { image_url?: string }>;
+                const firstVariantWithImage = Object.values(variants).find(variant => variant.image_url);
+                
+                return c.json({
+                    ...shoe,
+                    first_image: firstVariantWithImage?.image_url || null
+                });
             } catch (error) {
                 throw error;
             }
