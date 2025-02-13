@@ -161,8 +161,12 @@ export const shoesRoute = new OpenAPIHono({
                     }
                 });
 
-                const variants = shoe?.variants as Record<string, { image_url?: string }>;
-                const firstVariantWithImage = Object.values(variants).find(variant => variant.image_url);
+                if (!shoe) {
+                    return c.json({ message: "Shoe not found" }, 404);
+                }
+        
+                const variants = shoe.variants as Record<string, { image_url?: string }>;
+                const firstVariantWithImage = variants ? Object.values(variants).find(variant => variant.image_url) : null;
                 
                 return c.json({
                     ...shoe,
