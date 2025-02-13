@@ -134,7 +134,7 @@ export const cartRoute = new OpenAPIHono({
                         variantKey: body.variantKey,
                         quantity: body.quantity,
                         price: itemPrice,
-                        name: `${shoe.name} - ${variants[body.variantKey]}`
+                        name: `${shoe.name} - ${body.variantKey}`
                     });
                 }
 
